@@ -8,11 +8,13 @@ namespace SocketApp
 {
     class TestMiddleware : Middleware
     {
+
+        //public TestMiddleware(TestInject testService) { }
         public override async Task Invoke(HttpContext httpContext)
         {
             Console.WriteLine("TestMiddleware invoke");
 
-            await this.Next.Invoke(httpContext);
+            await this.NextInvoke(httpContext);
         }
     }
 }

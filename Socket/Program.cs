@@ -1,4 +1,5 @@
 ﻿using SocketApp.Models;
+using SocketApp.Services;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -10,12 +11,14 @@ namespace SocketApp
 {
     class Program
     {
-        private static readonly PoldoMiddlewareManager poldoMiddlewareManager = new PoldoMiddlewareManager();
+        //private static readonly PoldoMiddlewareManager poldoMiddlewareManager = new PoldoMiddlewareManager();
 
         public static ManualResetEvent allDone = new ManualResetEvent(false);
-        static Program() 
+        static Program()
         {
-            Startup.ConfigureMiddleware(poldoMiddlewareManager);
+
+            Startup.ConfigureServices(new Service());
+            Startup.ConfigureMiddleware(new MiddlewareManager());
         }
 
         static void Main(string[] args)
@@ -71,7 +74,7 @@ namespace SocketApp
         public static void ReadCallback(IAsyncResult ar)
         {
             Console.WriteLine("Leggo");
-            HttpContext httpContext  = (HttpContext)ar.AsyncState;
+            HttpContext httpContext = (HttpContext)ar.AsyncState;
             Socket handler = httpContext.workSocket;
             int read = handler.EndReceive(ar);
             if (read == httpContext.buffer.Length)
@@ -103,35 +106,37 @@ namespace SocketApp
 
         private static async Task Send(HttpContext httpContext)
         {
-            Socket handler = httpContext.workSocket;
-           
-            Response response = new Response
-            {
-                Version = "HTTP/1.1",
-                Code = "200 OK"
-            };
-            response.Add("Server","PoldoServer");
-            response.Add("Connection", "close");
-            httpContext.Response = response;
+            //Socket handler = httpContext.workSocket;
 
-           
-            await poldoMiddlewareManager.Invoke(httpContext);
+            //Response response = new Response
+            //{
+            //    Version = "HTTP/1.1",
+            //    Code = "200 OK"
+            //};
+            //response.Add("Server", "PoldoServer");
+            //response.Add("Connection", "close");
+            //httpContext.Response = response;
 
-            StringBuilder str = new StringBuilder();
-            str.Append("<!DOCTYPE html>\r\n");
-            str.Append("<html class=\"client -nojs\" lang=\"it\" dir=\"ltr\">\r\n");
-            str.Append("<head>\r\n");
-            str.Append("<meta charset=\"UTF -8\" />\r\n");
-            str.Append("<title>POLDO</title>\r\n");
-            str.Append("<body>\r\n");
-            str.Append("<div style=\"width: 200px; height: 200px; background: red; \"></div>");
-            str.Append("</body>\r\n");
-            str.Append("</html>");
-            StringBuilder strBuilder = response.ToStringBuilder(str.ToString());
-            byte[] byteData = Encoding.ASCII.GetBytes(strBuilder.ToString());
-            // Begin sending the data to the remote device.  
-            handler.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), handler);
+
+            //poldoMiddlewareManager.Reset();
+            await new StartChain().NextInvoke(httpContext);
+
+
+            //StringBuilder str = new StringBuilder();
+            //str.Append("<!DOCTYPE html>\r\n");
+            //str.Append("<html class=\"client -nojs\" lang=\"it\" dir=\"ltr\">\r\n");
+            //str.Append("<head>\r\n");
+            //str.Append("<meta charset=\"UTF -8\" />\r\n");
+            //str.Append("<title>POLDO</title>\r\n");
+            //str.Append("<body>\r\n");
+            //str.Append("<div style=\"width: 200px; height: 200px; background: red; \"></div>");
+            //str.Append("</body>\r\n");
+            //str.Append("</html>");
+            //StringBuilder strBuilder = response.ToStringBuilder(str.ToString());
+            //byte[] byteData = Encoding.ASCII.GetBytes(strBuilder.ToString());
+            //// Begin sending the data to the remote device.  
+            //handler.BeginSend(byteData, 0, byteData.Length, 0,
+            //    new AsyncCallback(SendCallback), handler);
         }
 
 

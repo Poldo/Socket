@@ -1,10 +1,4 @@
-﻿using SocketApp.Models;
-using SocketApp.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SocketApp.Services;
 
 namespace SocketApp
 {
@@ -12,17 +6,26 @@ namespace SocketApp
     {
 
 
-        //internal static void ConfigureService() 
-        //{
-        //    applicationBuilder.GetType().GetConstructors().SelectMany(x => x.GetParameters()).Select(x => x.ParameterType)
-        //    Activator.CreateInstance(typeof(string), new object[1] { new TestService() });
-        //}
+        internal static void ConfigureServices(IService service)
+        {
+            service.AddScoped<PoldoMiddleware>();
+            service.AddSingleton<OdlopMiddleware>();
+            service.AddTransient<TestMiddleware>();
+            //service.AddScoped<TestInject>();
+            service.AddSingleton<StaticFileMiddleware>();
+            service.AddScoped<MvcMiddleware>();
+        }
+
+
+
 
         internal static void ConfigureMiddleware(IApplicationBuilder applicationBuilder)  
         {
+            applicationBuilder.Add<StaticFileMiddleware>();
             applicationBuilder.Add<PoldoMiddleware>();
             applicationBuilder.Add<OdlopMiddleware>();
             applicationBuilder.Add<TestMiddleware>();
+            applicationBuilder.Add<MvcMiddleware>();
         }
 
     }

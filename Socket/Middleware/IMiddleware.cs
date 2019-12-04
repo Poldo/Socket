@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace SocketApp
 {
+
     public interface IMiddleware
     {
+
         Task Invoke(HttpContext httpContext);
-        void SetSuccessor(IMiddleware next);
+        Task NextInvoke(HttpContext httpContext);
     }
 }
