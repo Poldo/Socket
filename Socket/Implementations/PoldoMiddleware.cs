@@ -9,13 +9,22 @@ namespace SocketApp
 {
     public class PoldoMiddleware : Middleware
     {
-        //private TestInject TestService;
-        //public PoldoMiddleware(TestInject testService) => this.TestService = testService;
+        //public PoldoMiddleware() { }
+
+        private TestInject TestService;
+        public MyInject MyInject;
+        public PoldoMiddleware(TestInject testService, MyInject myInject)
+        {
+            TestService = testService;
+            MyInject = myInject;
+        }
+
+        
+
         public override async Task Invoke(HttpContext httpContext)
         {
-            //TestService.Name = "CIAO";
-            //Console.WriteLine($"PoldoMiddleware invoke {TestService.Name}");
-            Console.WriteLine($"PoldoMiddleware invoke");
+            TestService.Name = "CIAO";
+            Console.WriteLine($"PoldoMiddleware invoke {TestService.Name} {MyInject.Name}");
             await this.NextInvoke(httpContext);
         }
 

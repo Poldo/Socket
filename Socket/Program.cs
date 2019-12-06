@@ -11,7 +11,6 @@ namespace SocketApp
 {
     class Program
     {
-        //private static readonly PoldoMiddlewareManager poldoMiddlewareManager = new PoldoMiddlewareManager();
 
         public static ManualResetEvent allDone = new ManualResetEvent(false);
         static Program()
@@ -80,90 +79,16 @@ namespace SocketApp
             if (read == httpContext.buffer.Length)
             {
                 string content = Encoding.ASCII.GetString(httpContext.buffer, 0, read);
-                Request req = CreateRequestObject(content);
+                Request req = httpContext.CreateRequestObject(content);
                 httpContext.Request = req;
                 Console.WriteLine($"Read {content.Length} bytes from socket.\n Data : {content}");
                 Send(httpContext).ConfigureAwait(false).GetAwaiter().GetResult();
             }
         }
 
-
-        private static void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                Socket handler = (Socket)ar.AsyncState;
-                int bytesSent = handler.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
         private static async Task Send(HttpContext httpContext)
         {
-            //Socket handler = httpContext.workSocket;
-
-            //Response response = new Response
-            //{
-            //    Version = "HTTP/1.1",
-            //    Code = "200 OK"
-            //};
-            //response.Add("Server", "PoldoServer");
-            //response.Add("Connection", "close");
-            //httpContext.Response = response;
-
-
-            //poldoMiddlewareManager.Reset();
             await new StartChain().NextInvoke(httpContext);
-
-
-            //StringBuilder str = new StringBuilder();
-            //str.Append("<!DOCTYPE html>\r\n");
-            //str.Append("<html class=\"client -nojs\" lang=\"it\" dir=\"ltr\">\r\n");
-            //str.Append("<head>\r\n");
-            //str.Append("<meta charset=\"UTF -8\" />\r\n");
-            //str.Append("<title>POLDO</title>\r\n");
-            //str.Append("<body>\r\n");
-            //str.Append("<div style=\"width: 200px; height: 200px; background: red; \"></div>");
-            //str.Append("</body>\r\n");
-            //str.Append("</html>");
-            //StringBuilder strBuilder = response.ToStringBuilder(str.ToString());
-            //byte[] byteData = Encoding.ASCII.GetBytes(strBuilder.ToString());
-            //// Begin sending the data to the remote device.  
-            //handler.BeginSend(byteData, 0, byteData.Length, 0,
-            //    new AsyncCallback(SendCallback), handler);
-        }
-
-
-        private static Request CreateRequestObject(string content)
-        {
-            if (content == null || content.Length == 0) { return new Request(); }
-            string[] lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-
-            string[] firstLineParts = lines[0].Split(" ");
-            Request request = new Request
-            {
-                Verb = firstLineParts[0],
-                Path = firstLineParts[1],
-                Version = firstLineParts[2]
-            };
-            for (int i = 1; i < lines.Length; i++)
-            {
-                if (lines[i].Length != 0)
-                {
-                    string[] parts = lines[i].Split(":", 2);
-                    if (parts.Length == 2)
-                    {
-                        request.Add(parts[0], parts[1]);
-                    }
-                }
-            }
-            return request;
         }
 
     }
